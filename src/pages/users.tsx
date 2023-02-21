@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import type { user } from '@/types/users.types';
-import { GetServerSideProps } from 'next';
+import { GetServerSideProps, GetStaticProps } from 'next';
 import { wrapper } from '@/store/store';
-import { fetchUsers } from '@/features/usersSlice';
+import { addUsers, fetchUsers } from '@/features/usersSlice';
+import Link from 'next/link';
 
 interface usersProps{
     users:user[],
-    isLoading:boolean
 }
 
 
@@ -21,21 +21,22 @@ const users = ({users}:usersProps) => {
     return (
         <div>
             <h1>Все пользователи</h1>
-           <ul>
+          <ul>
                 {users?.map((item)=>{
-                    return <li>{item.name}</li>
+                    return <li><Link href={`/users/${item.id}`}>{item.name}</Link></li>
                 })}
             </ul>
-            
+
         </div>
     );
 };
 
 export default users;
 
-export const getServerSideProps:GetServerSideProps  = wrapper.getServerSideProps((store) => async(ctx) => {
+export const getStaticProps:GetStaticProps  = wrapper.getStaticProps((store) => async(ctx) => {
     const data = await store.dispatch(fetchUsers())
    const users = data.payload
+   store.dispatch(addUsers(users))
     return {props:{users}};
 })
 
